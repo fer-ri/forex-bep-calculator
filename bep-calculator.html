@@ -1,0 +1,288 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Averaging Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+  </head>
+  <body>
+  <div id="app">
+    <section class="section">
+      <div class="container">
+        <h1 class="title has-text-weight-light">
+          Averaging Calculator
+        </h1>
+        <div class="columns">
+          <div class="column">
+            <div class="field is-horizontal" v-for="(item, index) in orders">
+              <div class="field-body">
+                <div class="field">
+                  <p class="control">
+                    <input class="input" type="text" placeholder="Price" v-model="item.price">
+                  </p>
+                </div>
+                <div class="field">
+                  <p class="control">
+                    <input class="input" type="text" placeholder="Lot" v-model="item.lot">
+                  </p>
+                </div>
+                <div class="field">
+                  <div class="control">
+                    <button style="width: 36px" class="button is-info" @click="addOrder()" v-if="index === 0">
+                      +
+                    </button>
+                    <button style="width: 36px" class="button is-danger" @click="removeOrder(item)" v-else>
+                      -
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="column">
+            <div class="notification is-success">
+              <p class="is-size-3 has-text-weight-light has-text-centered">BEP AT {{ bepPrice }}</p>
+            </div>
+
+            <div class="field is-horizontal">
+              <div class="field-label is-normal" style="flex-grow: 2">
+                <label class="label">Order Type</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <select v-model="orderType">
+                        <option value="sell">SELL</option>
+                        <option value="buy">BUY</option>
+                      </select>                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field is-horizontal">
+              <div class="field-label is-normal" style="flex-grow: 2">
+                <label class="label">Digits</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <input class="input" type="number" min="0" v-model="digits">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field is-horizontal">
+              <div class="field-label is-normal" style="flex-grow: 2">
+                <label class="label">Total Order</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <input disabled class="input" type="text" v-model="totalOrder">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field is-horizontal">
+              <div class="field-label is-normal" style="flex-grow: 2">
+                <label class="label">Total Lot</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <input disabled class="input" type="text" v-model="totalLot">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field is-horizontal">
+              <div class="field-label is-normal" style="flex-grow: 2">
+                <label class="label">Current Price</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <input class="input" type="text" placeholder="Current Price" v-model="currentPrice">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field is-horizontal">
+              <div class="field-label is-normal" style="flex-grow: 2">
+                <label class="label">Total Profit</label>
+              </div>
+              <div class="field-body">
+                <div class="field">
+                  <div class="control">
+                    <input disabled class="input" type="text" v-model="totalProfit(currentPrice)">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        digits: 4,
+        pipValue: 0.0001,
+        orderType: 'buy',
+        currentPrice: '',
+        orders: [
+          {
+            price: '1.3466',
+            lot: '0.02'
+          },
+          {
+            price: '1.3459',
+            lot: '0.02'
+          },
+          {
+            price: '1.3452',
+            lot: '0.02'
+          },
+          {
+            price: '1.3445',
+            lot: '0.02'
+          },
+          {
+            price: '1.3438',
+            lot: '0.02'
+          },
+          {
+            price: '1.3431',
+            lot: '0.02'
+          },
+          {
+            price: '1.3424',
+            lot: '0.02'
+          },
+          {
+            price: '1.3413',
+            lot: '0.02'
+          },
+          {
+            price: '1.3400',
+            lot: '0.02'
+          },
+          {
+            price: '1.3385',
+            lot: '0.02'
+          },
+          {
+            price: '1.3368',
+            lot: '0.02'
+          },
+        ]
+      },
+      methods: {
+        addOrder () {
+          this.orders.push({
+            price: '',
+            lot: ''
+          });
+        },
+        removeOrder (order) {
+          var index = this.orders.indexOf(order);
+
+          this.orders.splice(index, 1);
+        },
+        orderProfit (orderType, openPrice, currentPrice, lot) {
+          openPrice = parseFloat(openPrice);
+          currentPrice = parseFloat(currentPrice);
+          lot = parseFloat(lot);
+
+          if (orderType == 'buy') {
+            pips = (currentPrice - openPrice) / this.pipValue;
+          } else {
+            pips = (openPrice - currentPrice) / this.pipValue;
+          }
+
+          return parseFloat((this.round(pips) * lot).toFixed(2));
+        },
+        totalProfit (currentPrice = null) {
+          currentPrice = currentPrice || this.currentPrice;
+
+          if (! currentPrice) {
+            return 0;
+          }
+
+          return this.orders.reduce((total, item) => {
+            var orderProfit = this.orderProfit(
+              this.orderType, 
+              item.price,
+              currentPrice,
+              item.lot
+            );
+
+            return total + orderProfit;
+          }, 0).toFixed(2);
+        },
+        round (value) {
+          return (value >= 0 || -1) * Math.round(Math.abs(value));
+        }
+      },
+      computed: {
+        totalOrder () {
+          return this.orders.length;
+        },
+        totalLot () {
+          return this.orders.reduce((total, item) => {
+            return total + (parseFloat(item.lot) || 0);
+          }, 0).toFixed(2);
+        },
+        bepPrice () {
+          var orders = this.orders.slice(0);
+
+          if (this.orderType == 'buy') {
+            orders.sort((a, b) => {
+              return parseFloat(b.price) - parseFloat(a.price);
+            });
+
+            var price = orders[orders.length - 1].price;
+
+            var totalProfit = this.totalProfit(price);
+
+            while (totalProfit < 0) {
+              price = parseFloat(price) + (1 * this.pipValue);
+
+              totalProfit = this.totalProfit(price);
+            }
+          } else {
+            orders.sort((a, b) => {
+              return parseFloat(a.price) - parseFloat(b.price);
+            });
+
+            var price = orders[orders.length - 1].price;
+
+            var totalProfit = this.totalProfit(price);
+
+            while (totalProfit < 0) {
+              price = parseFloat(price) - (1 * this.pipValue);
+
+              totalProfit = this.totalProfit(price);
+            }
+          }
+
+          return price.toFixed(this.digits);
+        }
+      }
+    })
+  </script>
+  </body>
+</html>
